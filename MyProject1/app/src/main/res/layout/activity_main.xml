@@ -2,8 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -76,6 +75,7 @@
                     android:orientation="horizontal">
 
                     <Button
+                        android:id="@+id/likeButton"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_marginRight="5dp"
@@ -84,6 +84,7 @@
                         app:backgroundTintMode="add" />
 
                     <TextView
+                        android:id="@+id/likeCountView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="15"
@@ -92,6 +93,7 @@
                         android:textStyle="bold" />
 
                     <Button
+                        android:id="@+id/dislikeButton"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_marginLeft="10dp"
@@ -101,6 +103,7 @@
                         app:backgroundTintMode="add" />
 
                     <TextView
+                        android:id="@+id/dislikeCountView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="1"
@@ -189,6 +192,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
+                        android:progressTint="@color/purple_500"
                         android:rating="4.1"
                         android:stepSize="0.5" />
 
@@ -347,12 +351,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
                     android:layout_marginLeft="10dp"
-                    android:layout_marginTop="15dp"
+                    android:layout_marginTop="31dp"
                     android:layout_marginBottom="15dp"
                     android:text="한줄평"
                     android:textColor="@color/black"
-                    android:textSize="18dp"
+                    android:textSize="19dp"
                     android:textStyle="bold" />
 
                 <LinearLayout
@@ -361,47 +366,56 @@
                     android:layout_alignParentRight="true"
                     android:layout_marginTop="15dp"
                     android:layout_marginRight="10dp"
-                    android:layout_marginBottom="15dp"
                     android:orientation="horizontal">
 
                     <ImageView
                         android:layout_width="25dp"
                         android:layout_height="25dp"
                         android:layout_gravity="center"
-                        android:layout_marginLeft="10dp"
+                        android:layout_marginStart="7dp"
+                        android:layout_marginLeft="7dp"
                         android:src="@drawable/ic_review_selected" />
 
-                    <TextView
+                    <Button
+                        android:id="@+id/writeButton"
+                        style="@style/Widget.AppCompat.Button.Borderless"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_marginLeft="5dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:background="@color/white"
+                        android:paddingLeft="2dp"
+                        android:paddingTop="2dp"
+                        android:paddingRight="2dp"
+                        android:paddingBottom="2dp"
                         android:text="작성하기"
-                        android:textColor="@color/design_default_color_error"
-                        android:textSize="18dp"
-                        android:textStyle="bold" />
+                        android:textColor="#FF5722"
+                        android:textSize="19dp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/cardview_shadow_end_color"
+                        app:backgroundTintMode="add" />
                 </LinearLayout>
 
             </RelativeLayout>
 
-            <FrameLayout
-                android:id="@+id/framelayout1"
+            <ListView
+                android:id="@+id/listView"
                 android:layout_width="match_parent"
-                android:layout_height="270dp"
-                android:layout_below="@+id/relativelayout1">
-
-            </FrameLayout>
+                android:layout_height="match_parent"
+                android:layout_below="@+id/relativelayout1"
+                android:layout_above="@+id/allSeeButton"/>
 
             <Button
+                android:id="@+id/allSeeButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/framelayout1"
+
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentBottom="true"
                 android:layout_marginStart="10dp"
                 android:layout_marginLeft="10dp"
-                android:layout_marginTop="8dp"
                 android:layout_marginEnd="10dp"
                 android:layout_marginRight="9dp"
                 android:layout_marginBottom="12dp"
@@ -410,6 +424,7 @@
                 android:textColor="@color/purple_500"
                 app:backgroundTint="@color/cardview_shadow_end_color"
                 app:backgroundTintMode="add" />
+
 
         </RelativeLayout>
 
