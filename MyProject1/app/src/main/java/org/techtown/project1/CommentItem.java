@@ -1,12 +1,16 @@
 package org.techtown.project1;
 
-public class CommentItem {
+import java.io.Serializable;
+
+public class CommentItem implements Serializable {
     String id;
     String comment;
+    float rating;
 
-    public CommentItem(String id, String comment) {
+    public CommentItem(String id, String comment, float rating) {
         this.id = id;
         this.comment = comment;
+        this.rating = rating;
     }
 
     public String getId() {
@@ -23,5 +27,13 @@ public class CommentItem {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public float getRating() {
+        return rating;
+    }
+
+    public void setRating(float rating) {
+        this.rating = rating;
     }
 }

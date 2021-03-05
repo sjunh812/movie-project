@@ -9,6 +9,14 @@
         android:roundIcon="@drawable/ic_app"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyProject1">
+
+        <activity android:name=".AllCommentsActivity"
+            android:label="한줄평 목록"></activity>
+
+        <activity
+            android:name=".WriteCommentActivity"
+            android:label="한줄평 작성"></activity>
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -16,6 +24,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>

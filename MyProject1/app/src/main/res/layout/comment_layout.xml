@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginLeft="18dp"
+    android:layout_marginTop="10dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal">
 
@@ -24,10 +25,11 @@
             android:id="@+id/commentId"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/font_dohyeon"
             android:text="kym71**"
-            android:textSize="10dp"
             android:textColor="@color/black"
-            android:textStyle="bold"/>
+            android:textSize="12dp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -38,9 +40,11 @@
                 android:id="@+id/commentTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:fontFamily="@font/font_dohyeon"
                 android:text="10분전"
                 android:textColor="@android:color/darker_gray"
-                android:textSize="10dp" />
+                android:textSize="12dp" />
 
             <RatingBar
                 android:id="@+id/commentRatingBar"
@@ -49,9 +53,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginLeft="10dp"
-                android:progressTint="@color/purple_500"
-                android:rating="5"
-                android:stepSize="0.5" />
+                android:numStars="5"
+                android:rating="4.1"
+                android:stepSize="0.1" />
         </LinearLayout>
 
         <TextView
@@ -60,10 +64,11 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
+            android:fontFamily="@font/font_dohyeon"
             android:text="한줄평 입니다."
-            android:textStyle="bold"
             android:textColor="@color/black"
-            android:textSize="12dp"/>
+            android:textSize="14dp"
+            android:textStyle="bold" />
 
 
         <LinearLayout
@@ -75,23 +80,25 @@
                 android:id="@+id/recommendCountView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/font_dohyeon"
                 android:text="추천  0  |"
-                android:textSize="10dp"
-                android:textColor="@color/black" />
+                android:textColor="@color/black"
+                android:textSize="12dp" />
 
             <Button
                 android:id="@+id/reportButton"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="50dp"
                 android:layout_height="30dp"
-                android:text="신고하기"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="10dp"
+                android:background="@color/white"
+                android:fontFamily="@font/font_dohyeon"
                 android:paddingLeft="2dp"
                 android:paddingTop="2dp"
                 android:paddingRight="2dp"
                 android:paddingBottom="2dp"
-                android:background="@color/white"
+                android:text="신고하기"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="12dp"
                 app:backgroundTint="@color/cardview_shadow_end_color"
                 app:backgroundTintMode="add" />
 

@@ -5,9 +5,12 @@ import android.media.Rating;
 import android.text.Layout;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -33,7 +36,15 @@ public class CommentLayout extends LinearLayout {
 
         userId = (TextView)findViewById(R.id.commentId);
         comment = (TextView)findViewById(R.id.commentView);
-        ratingBar = (RatingBar)findViewById(R.id.ratingBar);
+        ratingBar = (RatingBar)findViewById(R.id.commentRatingBar);
+
+        Button button = (Button)findViewById(R.id.reportButton);
+        button.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(context, "신고", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     public void setUserId(String id) {
@@ -43,9 +54,8 @@ public class CommentLayout extends LinearLayout {
     public void setComment(String comment) {
         this.comment.setText(comment);
     }
-    /*
-    public void setRatingBar() {
 
+    public void setRatingBar(float rating) {
+        ratingBar.setRating(rating);
     }
-     */
 }
