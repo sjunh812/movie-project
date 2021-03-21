@@ -15,17 +15,19 @@
         android:padding="10dp">
 
         <TextView
+            android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
             android:fontFamily="@font/font_dohyeon"
             android:text="군도"
             android:textSize="32dp"
-            android:layout_gravity="center_vertical"
             android:textStyle="bold" />
 
         <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:id="@+id/grade"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_marginLeft="10dp"
             android:src="@drawable/ic_15"
             android:layout_gravity="center"/>

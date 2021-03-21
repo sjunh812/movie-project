@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingTop="50dp">
+
+    <FrameLayout
+        android:layout_width="300dp"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:layout_gravity="center"
+        android:layout_marginBottom="40dp">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            tools:visibility="invisible" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/font_dohyeon"
+            android:layout_gravity="center"
+            android:layout_marginBottom="10dp"
+            android:textColor="@color/white"
+            android:textSize="35dp"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:src="@drawable/home_slider1"
+            android:layout_gravity="center"
+            android:layout_marginBottom="10dp"/>
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/font_dohyeon"
+            android:layout_gravity="center"
+            android:textColor="@color/white"
+            android:textSize="20dp"
+            android:layout_marginBottom="30dp"/>
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="230dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:background="@drawable/round_orange_button"
+            android:fontFamily="@font/font_dohyeon"
+            android:text="상세보기"
+            android:textSize="30dp"
+            app:backgroundTint="@color/cardview_shadow_end_color"
+            app:backgroundTintMode="add"/>
+    </LinearLayout>
+</LinearLayout>

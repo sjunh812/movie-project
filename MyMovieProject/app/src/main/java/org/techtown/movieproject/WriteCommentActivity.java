@@ -5,34 +5,45 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RatingBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class WriteCommentActivity extends AppCompatActivity {
-    private boolean save;
+import org.techtown.movieproject.api.CommentInfo;
+import org.techtown.movieproject.api.MovieInfo;
+import org.techtown.movieproject.comment.CommentAdapter;
 
+import java.util.ArrayList;
+
+public class WriteCommentActivity extends AppCompatActivity {
+    // UI
+    private TextView title;
+    private ImageView grade;
     private RatingBar ratingBar;
+    private EditText id;
     private EditText comments;
+
+    // Data
+    private MovieInfo movieInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_write_comment);
 
+        title = (TextView)findViewById(R.id.title);
+        grade = (ImageView)findViewById(R.id.grade);
         ratingBar = (RatingBar)findViewById(R.id.ratingBar);
+        id = (EditText)findViewById(R.id.idView);
         comments = (EditText)findViewById(R.id.commentView);
 
         Button saveButton = (Button)findViewById(R.id.saveButton);      // 저장 버튼
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                save = true;
-
-                Toast.makeText(getApplicationContext(), "작성하기 화면에서 돌아왔습니다.\n" +
-                        "저장여부 : " + save, Toast.LENGTH_SHORT).show();
-
                 passToMainActivity();
             }
         });
@@ -41,35 +52,41 @@ public class WriteCommentActivity extends AppCompatActivity {
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                save = false;
-
-                Toast.makeText(getApplicationContext(), "작성하기 화면에서 돌아왔습니다.\n" +
-                        "저장여부 : " + save, Toast.LENGTH_SHORT).show();
-
                 returnToMainActivity();
             }
         });
+
+        Intent intent = getIntent();
+        processIntent(intent);
     }
 
-    private void passToMainActivity() {     // 메인화면으로 데이터 전달
+    private void passToMainActivity() {     // 메인액티비티로 Intent 객체전달
         float rating = ratingBar.getRating();
+        String id = this.id.getText().toString();
         String comment = comments.getText().toString();
 
-        if(comment.equals("")) {
-            Toast.makeText(getApplicationContext(), "내용을 입력해주세요", Toast.LENGTH_LONG).show();
+        if(id.equals("")) {
+            Toast.makeText(getApplicationContext(), "닉네임을 입력해주세요!", Toast.LENGTH_LONG).show();
         }
         else {
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            putExtraToIntent(intent, rating, comment);
-
-            startActivity(intent);
+            if(comment.equals("")) {
+                Toast.makeText(getApplicationContext(), "내용을 입력해주세요!", Toast.LENGTH_LONG).show();
+            }
+            else {
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                putExtraToIntent(intent, movieInfo.id, id, rating, comment);
+            }
         }
     }
 
-    private void putExtraToIntent(Intent intent, float rating, String comment) {
+    private void putExtraToIntent(Intent intent, int movieId, String userId, float rating, String comment) {
+        intent.putExtra("movieId", movieId);
+        intent.putExtra("userId", userId);
         intent.putExtra("rating",rating);
         intent.putExtra("comments", comment);
+
+        startActivity(intent);
     }
 
     private void returnToMainActivity() {   // 메인화면으로 (데이터 x)
@@ -77,5 +94,28 @@ public class WriteCommentActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         startActivity(intent);
+    }
+
+    private void processIntent(Intent intent) {
+        movieInfo = (MovieInfo)intent.getSerializableExtra("movieInfo");
+        title.setText(movieInfo.title);
+        setGradeImage(movieInfo.grade);
+    }
+
+    private void setGradeImage(int grade) {
+        switch (grade) {
+            case 0:
+                this.grade.setImageResource(R.drawable.ic_all);
+                break;
+            case 12:
+                this.grade.setImageResource(R.drawable.ic_12);
+                break;
+            case 15:
+                this.grade.setImageResource(R.drawable.ic_15);
+                break;
+            case 19:
+                this.grade.setImageResource(R.drawable.ic_19);
+                break;
+        }
     }
 }
