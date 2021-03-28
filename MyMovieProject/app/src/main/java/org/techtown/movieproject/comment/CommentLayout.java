@@ -23,18 +23,15 @@ public class CommentLayout extends LinearLayout {
     private RatingBar ratingBar;
     private TextView recommend;
 
-    // Interface
     private FragmentCallback callback;
 
     public CommentLayout(Context context) {
         super(context);
-
         init(context);
     }
 
     public CommentLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-
         init(context);
     }
 
@@ -51,22 +48,6 @@ public class CommentLayout extends LinearLayout {
         comment = (TextView)findViewById(R.id.commentView);
         ratingBar = (RatingBar)findViewById(R.id.commentRatingBar);
         recommend = (TextView)findViewById(R.id.recommendCountView);
-
-/*        Button recommendButton = (Button)findViewById(R.id.recommendButton);    // 추천버튼
-        recommendButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                callback.increaseRecommend(userId.getText().toString());
-            }
-        });*/
-
-        Button reportButton = (Button)findViewById(R.id.reportButton);      // 신고버튼
-        reportButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(context, "신고", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     public void setUserId(String id) {

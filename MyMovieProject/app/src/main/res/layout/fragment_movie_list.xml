@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingTop="50dp">
+    android:paddingTop="40dp">
 
     <FrameLayout
         android:layout_width="300dp"
@@ -74,5 +74,6 @@
             android:textSize="30dp"
             app:backgroundTint="@color/cardview_shadow_end_color"
             app:backgroundTintMode="add"/>
+
     </LinearLayout>
 </LinearLayout>

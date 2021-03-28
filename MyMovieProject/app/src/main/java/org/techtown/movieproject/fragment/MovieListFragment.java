@@ -1,7 +1,11 @@
 package org.techtown.movieproject.fragment;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,14 +18,26 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.android.volley.toolbox.Volley;
+import com.google.android.material.snackbar.Snackbar;
+
+import org.techtown.movieproject.AppHelper;
 import org.techtown.movieproject.FragmentCallback;
 import org.techtown.movieproject.ImageLoadTask;
+import org.techtown.movieproject.NetworkStatus;
 import org.techtown.movieproject.R;
 import org.techtown.movieproject.api.MovieInfo;
+import org.techtown.movieproject.api.MovieList;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class MovieListFragment extends Fragment {
     private FragmentCallback callback;
-    private ImageLoadTask task;
+
+    // 상수
+    private static final String LOG = "movieListFragment";
 
     // UI
     private ImageView imageView;
@@ -29,7 +45,7 @@ public class MovieListFragment extends Fragment {
     private TextView textView;
     private ProgressBar progressBar;
 
-    // Data
+    // 데이터
     private int index;
     private MovieInfo movieInfo;
     private String grade;
@@ -66,8 +82,21 @@ public class MovieListFragment extends Fragment {
         progressBar.setVisibility(View.INVISIBLE);
 
         imageView = (ImageView)rootView.findViewById(R.id.imageView);
-        task = new ImageLoadTask(movieInfo.image, imageView, progressBar);
-        task.execute();
+
+        int networkStatus = NetworkStatus.getConnectivity(getContext());
+
+        if(networkStatus == NetworkStatus.TYPE_NOT_CONNECTED) {
+            Bitmap bitmap = callback.getBitmapFromCacheDir(ImageLoadTask.IMAGE + movieInfo.id + ".jpg");
+            if(bitmap != null) {
+                imageView.setImageBitmap(bitmap);
+            }else {
+                progressBar.setVisibility(View.VISIBLE);
+                Log.d(LOG, "ERROR : Bitmap is null");
+            }
+        }else {
+            ImageLoadTask task = new ImageLoadTask(getContext(), movieInfo.id, "image", movieInfo.image, imageView, progressBar);
+            task.execute();
+        }
 
         title = (TextView)rootView.findViewById(R.id.title);
         title.setText(index + ". " + movieInfo.title);
@@ -81,7 +110,9 @@ public class MovieListFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 int id = movieInfo.id;
-                callback.onMoiveDetailsFragment(id);
+                int networkStatus = NetworkStatus.getConnectivity(getContext());
+
+                callback.onMoiveDetailsFragment(id, networkStatus);
             }
         });
 

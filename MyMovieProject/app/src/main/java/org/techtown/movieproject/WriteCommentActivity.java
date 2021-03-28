@@ -12,6 +12,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.snackbar.Snackbar;
+
 import org.techtown.movieproject.api.CommentInfo;
 import org.techtown.movieproject.api.MovieInfo;
 import org.techtown.movieproject.comment.CommentAdapter;
@@ -26,7 +28,7 @@ public class WriteCommentActivity extends AppCompatActivity {
     private EditText id;
     private EditText comments;
 
-    // Data
+    // 데이터
     private MovieInfo movieInfo;
 
     @Override
@@ -39,6 +41,13 @@ public class WriteCommentActivity extends AppCompatActivity {
         ratingBar = (RatingBar)findViewById(R.id.ratingBar);
         id = (EditText)findViewById(R.id.idView);
         comments = (EditText)findViewById(R.id.commentView);
+
+        // 네트워크 연결상태 점검
+        int networkStatus = NetworkStatus.getConnectivity(this);
+
+        if(networkStatus == NetworkStatus.TYPE_NOT_CONNECTED) {
+            Snackbar.make(title, "네트워크가 연결되지 않았습니다.\nWI-FI 또는 데이터를 활성화 해주세요.", Snackbar.LENGTH_LONG).show();
+        }
 
         Button saveButton = (Button)findViewById(R.id.saveButton);      // 저장 버튼
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -60,7 +69,15 @@ public class WriteCommentActivity extends AppCompatActivity {
         processIntent(intent);
     }
 
-    private void passToMainActivity() {     // 메인액티비티로 Intent 객체전달
+    private void processIntent(Intent intent) {
+        movieInfo = (MovieInfo)intent.getSerializableExtra("movieInfo");
+
+        title.setText(movieInfo.title);
+        setGradeImage(movieInfo.grade);
+    }
+
+    // 메인액티비티로 Intent 객체전달
+    private void passToMainActivity() {
         float rating = ratingBar.getRating();
         String id = this.id.getText().toString();
         String comment = comments.getText().toString();
@@ -75,18 +92,14 @@ public class WriteCommentActivity extends AppCompatActivity {
             else {
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                putExtraToIntent(intent, movieInfo.id, id, rating, comment);
+                intent.putExtra("movieId", movieInfo.id);
+                intent.putExtra("userId", id);
+                intent.putExtra("rating",rating);
+                intent.putExtra("comments", comment);
+
+                startActivity(intent);
             }
         }
-    }
-
-    private void putExtraToIntent(Intent intent, int movieId, String userId, float rating, String comment) {
-        intent.putExtra("movieId", movieId);
-        intent.putExtra("userId", userId);
-        intent.putExtra("rating",rating);
-        intent.putExtra("comments", comment);
-
-        startActivity(intent);
     }
 
     private void returnToMainActivity() {   // 메인화면으로 (데이터 x)
@@ -94,12 +107,6 @@ public class WriteCommentActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         startActivity(intent);
-    }
-
-    private void processIntent(Intent intent) {
-        movieInfo = (MovieInfo)intent.getSerializableExtra("movieInfo");
-        title.setText(movieInfo.title);
-        setGradeImage(movieInfo.grade);
     }
 
     private void setGradeImage(int grade) {

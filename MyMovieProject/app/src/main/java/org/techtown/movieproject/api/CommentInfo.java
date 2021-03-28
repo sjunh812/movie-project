@@ -13,6 +13,18 @@ public class CommentInfo implements Serializable {
     private String contents;
     private int recommend;
 
+    public CommentInfo(int id, String writer, int movieId, String writer_iamge, String time, long timestamp, float rating, String contents, int recommend) {
+        this.id = id;
+        this.writer = writer;
+        this.movieId = movieId;
+        this.writer_iamge = writer_iamge;
+        this.time = time;
+        this.timestamp = timestamp;
+        this.rating = rating;
+        this.contents = contents;
+        this.recommend = recommend;
+    }
+
     public int getId() {
         return id;
     }

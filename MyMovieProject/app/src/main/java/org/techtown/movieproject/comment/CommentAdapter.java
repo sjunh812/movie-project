@@ -23,7 +23,7 @@ public class CommentAdapter extends BaseAdapter {
     private ArrayList<CommentInfo> items = new ArrayList<>();
 
     private ActivityCallback callback;
-    Context context;
+    private Context context;
 
     public CommentAdapter(Context context) {
         this.context = context;
@@ -74,7 +74,7 @@ public class CommentAdapter extends BaseAdapter {
         }
 
         CommentInfo item = items.get(position);
-        String time = calculateTime(item.getTimestamp() * 1000);
+        String time = calculateTime(item.getTimestamp() * 1000);        // ex) 1시간전, 2일전, 1년전...
 
         view.setUserId(String.valueOf(item.getWriter()));
         view.setTime(time);
@@ -82,12 +82,19 @@ public class CommentAdapter extends BaseAdapter {
         view.setRatingBar(item.getRating());
         view.setRecommend(String.valueOf(item.getRecommend()));
 
-        Button recommendButton = (Button)view.findViewById(R.id.recommendButton);
+        Button recommendButton = (Button)view.findViewById(R.id.recommendButton);       // 추천버튼
         recommendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("log",item.getId() + "!");
                 callback.increaseRecommend(item.getId(), item.getMovieId());
+            }
+        });
+
+        Button reportButton = (Button)view.findViewById(R.id.reportButton);      // 신고버튼
+        reportButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 신고 로직
             }
         });
 
@@ -98,7 +105,7 @@ public class CommentAdapter extends BaseAdapter {
         Calendar oldCal = Calendar.getInstance();       // 한줄평 올린 날짜정보
         Date date = new Date(timeStamp);
         oldCal.setTime(date);
-        Calendar cal = Calendar.getInstance();      // 지금 날짜정보
+        Calendar cal = Calendar.getInstance();      // 현재 날짜정보
 
         int oldYear = oldCal.get(Calendar.YEAR);
         int oldDay = oldCal.get(Calendar.DAY_OF_YEAR);
@@ -120,7 +127,7 @@ public class CommentAdapter extends BaseAdapter {
                 }
                 else {
                     if(oldHour > curHour) {
-                        return (curHour - oldHour) + "시간전";
+                        return (24 + curHour - oldHour) + "시간전";
                     }
                     else {
                         return (curDay - oldDay) + "일전";
