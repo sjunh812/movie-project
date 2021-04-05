@@ -2,6 +2,7 @@ package org.techtown.movieproject;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -10,15 +11,14 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.snackbar.Snackbar;
 
-import org.techtown.movieproject.api.CommentInfo;
 import org.techtown.movieproject.api.MovieInfo;
-import org.techtown.movieproject.comment.CommentAdapter;
-
-import java.util.ArrayList;
+import org.techtown.movieproject.helper.NetworkStatus;
 
 public class WriteCommentActivity extends AppCompatActivity {
     // UI
@@ -35,6 +35,11 @@ public class WriteCommentActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_write_comment);
+
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        toolbar.setTitle("한줄평 작성");
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         title = (TextView)findViewById(R.id.title);
         grade = (ImageView)findViewById(R.id.grade);
@@ -124,5 +129,18 @@ public class WriteCommentActivity extends AppCompatActivity {
                 this.grade.setImageResource(R.drawable.ic_19);
                 break;
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

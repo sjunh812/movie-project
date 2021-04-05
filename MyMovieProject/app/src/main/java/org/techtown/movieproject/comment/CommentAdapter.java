@@ -1,20 +1,15 @@
 package org.techtown.movieproject.comment;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.Toast;
 
-import org.techtown.movieproject.ActivityCallback;
-import org.techtown.movieproject.FragmentCallback;
+import org.techtown.movieproject.callback.ActivityCallback;
 import org.techtown.movieproject.R;
 import org.techtown.movieproject.api.CommentInfo;
-import org.techtown.movieproject.api.CommentList;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;

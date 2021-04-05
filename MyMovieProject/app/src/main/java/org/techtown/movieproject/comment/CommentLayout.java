@@ -3,16 +3,13 @@ package org.techtown.movieproject.comment;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
-import org.techtown.movieproject.FragmentCallback;
+import org.techtown.movieproject.callback.FragmentCallback;
 import org.techtown.movieproject.R;
 
 public class CommentLayout extends LinearLayout {

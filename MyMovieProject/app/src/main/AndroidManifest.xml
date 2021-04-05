@@ -6,24 +6,25 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-        android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:icon="@drawable/ic_app"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MyMovieProject">
-
-        <meta-data android:name="android.max_aspect" android:value="2.1" />
-
+        android:theme="@style/Theme.MyMovieProject"
+        android:usesCleartextTraffic="true">
+        <meta-data
+            android:name="android.max_aspect"
+            android:value="2.1" />
+        <activity
+            android:name=".PhotoActivity"
+            android:theme="@style/Theme.MyMovieProject.NoActionBar" />
         <activity
             android:name=".AllCommentsActivity"
-            android:label="한줄평 목록" />
-
+            android:theme="@style/Theme.MyMovieProject.NoActionBar" />
         <activity
             android:name=".WriteCommentActivity"
-            android:label="한줄평 작성" />
-
+            android:theme="@style/Theme.MyMovieProject.NoActionBar" />
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -34,6 +35,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
+
 </manifest>

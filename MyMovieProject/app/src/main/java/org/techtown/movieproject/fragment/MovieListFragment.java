@@ -2,9 +2,7 @@ package org.techtown.movieproject.fragment;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,20 +16,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.android.volley.toolbox.Volley;
-import com.google.android.material.snackbar.Snackbar;
-
-import org.techtown.movieproject.AppHelper;
-import org.techtown.movieproject.FragmentCallback;
-import org.techtown.movieproject.ImageLoadTask;
-import org.techtown.movieproject.NetworkStatus;
+import org.techtown.movieproject.callback.FragmentCallback;
+import org.techtown.movieproject.helper.ImageLoadTask;
+import org.techtown.movieproject.helper.NetworkStatus;
 import org.techtown.movieproject.R;
 import org.techtown.movieproject.api.MovieInfo;
-import org.techtown.movieproject.api.MovieList;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Random;
 
 public class MovieListFragment extends Fragment {
     private FragmentCallback callback;

@@ -1,4 +1,4 @@
-package org.techtown.movieproject;
+package org.techtown.movieproject.callback;
 
 import android.graphics.Bitmap;
 

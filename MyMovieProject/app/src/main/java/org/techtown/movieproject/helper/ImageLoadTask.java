@@ -1,21 +1,17 @@
-package org.techtown.movieproject;
+package org.techtown.movieproject.helper;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
+import org.techtown.movieproject.callback.FragmentCallback;
+import org.techtown.movieproject.callback.GalleryCallback;
+
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 
 public class ImageLoadTask extends AsyncTask<Void, Void, Bitmap> {
@@ -24,8 +20,8 @@ public class ImageLoadTask extends AsyncTask<Void, Void, Bitmap> {
     public static final String THUMB = "movieThumb";
 
     private FragmentCallback callback;
+    private GalleryCallback callback2;
 
-    private Context context;
     private int id;     // 영화 id
     private String col;     // 이미지 정보 (ex) image, thumb..)
     private String urlStr;      // 이미지 url
@@ -36,7 +32,6 @@ public class ImageLoadTask extends AsyncTask<Void, Void, Bitmap> {
     private HashMap<String, Bitmap> bitmapHash = new HashMap<>();       // 메모리 관리를 위한 HashMap
 
     public ImageLoadTask(Context context, int id, String col, String urlStr, ImageView imageView, ProgressBar progressBar) {
-        this.context = context;
         this.id = id;
         this.col = col;
         this.urlStr = urlStr;
@@ -45,6 +40,9 @@ public class ImageLoadTask extends AsyncTask<Void, Void, Bitmap> {
 
         if(context instanceof FragmentCallback) {
             callback = (FragmentCallback)context;
+        }
+        if(context instanceof GalleryCallback) {
+            callback2 = (GalleryCallback)context;
         }
     }
 
@@ -91,12 +89,16 @@ public class ImageLoadTask extends AsyncTask<Void, Void, Bitmap> {
 
         if(col.equals("image")) {
             callback.saveBitmapToJpeg(bitmap, IMAGE + id);
-        }else if(col.equals("thumb")) {
+        } else if(col.equals("thumb")) {
             callback.saveBitmapToJpeg(bitmap, THUMB + id);
         }
 
         progressBar.setVisibility(View.INVISIBLE);
         imageView.setImageBitmap(bitmap);
         imageView.invalidate();
+
+        if(callback2 != null){
+            callback2.init();
+        }
     }
 }

@@ -3,6 +3,7 @@ package org.techtown.movieproject;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -10,7 +11,9 @@ import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -23,11 +26,14 @@ import org.techtown.movieproject.api.CommentInfo;
 import org.techtown.movieproject.api.CommentList;
 import org.techtown.movieproject.api.MovieInfo;
 import org.techtown.movieproject.api.ResponseInfo;
+import org.techtown.movieproject.callback.ActivityCallback;
 import org.techtown.movieproject.comment.CommentAdapter;
+import org.techtown.movieproject.helper.AppHelper;
+import org.techtown.movieproject.helper.NetworkStatus;
 
 import java.util.ArrayList;
 
-public class AllCommentsActivity extends AppCompatActivity implements ActivityCallback{
+public class AllCommentsActivity extends AppCompatActivity implements ActivityCallback {
     // 상수
     private static final String LOG = "AllCommentsActivity";
 
@@ -49,6 +55,11 @@ public class AllCommentsActivity extends AppCompatActivity implements ActivityCa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_all_comments);
+
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        toolbar.setTitle("한줄평 목록");
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         title = (TextView)findViewById(R.id.title);
         grade = (ImageView)findViewById(R.id.grade);
@@ -179,5 +190,18 @@ public class AllCommentsActivity extends AppCompatActivity implements ActivityCa
                 this.grade.setImageResource(R.drawable.ic_19);
                 break;
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

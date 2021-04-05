@@ -2,17 +2,13 @@ package org.techtown.movieproject;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
-import com.android.volley.Network;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -23,7 +19,6 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.GravityCompat;
@@ -34,7 +29,6 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import org.techtown.movieproject.api.CommentInfo;
@@ -42,15 +36,19 @@ import org.techtown.movieproject.api.CommentList;
 import org.techtown.movieproject.api.MovieInfo;
 import org.techtown.movieproject.api.MovieList;
 import org.techtown.movieproject.api.ResponseInfo;
+import org.techtown.movieproject.callback.ActivityCallback;
+import org.techtown.movieproject.callback.FragmentCallback;
 import org.techtown.movieproject.fragment.MovieDetailsFragment;
 import org.techtown.movieproject.fragment.MovieListFragment;
+import org.techtown.movieproject.helper.AppHelper;
+import org.techtown.movieproject.helper.NetworkStatus;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, FragmentCallback, ActivityCallback{
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, FragmentCallback, ActivityCallback {
     // 상수
     private static final String TAG = "MainActivity";
 
@@ -302,7 +300,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        processCommentResponse(response);
+                        try {
+                            processCommentResponse(response);
+                        } catch(Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 },
                 new Response.ErrorListener() {

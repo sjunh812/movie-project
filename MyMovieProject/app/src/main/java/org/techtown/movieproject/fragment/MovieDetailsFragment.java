@@ -2,45 +2,47 @@ package org.techtown.movieproject.fragment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.media.Rating;
+import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.google.android.material.snackbar.Snackbar;
 
-import org.techtown.movieproject.AppHelper;
-import org.techtown.movieproject.ImageLoadTask;
-import org.techtown.movieproject.NetworkStatus;
-import org.techtown.movieproject.api.CommentInfo;
+import org.techtown.movieproject.helper.AppHelper;
+import org.techtown.movieproject.helper.ImageLoadTask;
+import org.techtown.movieproject.helper.NetworkStatus;
+import org.techtown.movieproject.PhotoActivity;
 import org.techtown.movieproject.api.CommentList;
+import org.techtown.movieproject.gallery.GalleryInfo;
 import org.techtown.movieproject.api.MovieInfo;
 import org.techtown.movieproject.comment.CommentAdapter;
-import org.techtown.movieproject.FragmentCallback;
+import org.techtown.movieproject.callback.FragmentCallback;
 import org.techtown.movieproject.R;
-import org.w3c.dom.Comment;
+import org.techtown.movieproject.gallery.GalleryAdapter;
 
 import java.util.ArrayList;
 
@@ -67,10 +69,12 @@ public class MovieDetailsFragment extends Fragment{
     private TextView synopsis;
     private TextView director;
     private TextView actor;
+    private RecyclerView recyclerView;
 
     private ImageLoadTask task;     // 이미지로딩에 필요한 AsyncTask 를 상속한 커스텀클래스
     private FragmentCallback callback;
     private CommentAdapter commentAdapter;
+    private GalleryAdapter galleryAdapter;
 
     // Data
     public int likeCount;
@@ -126,7 +130,6 @@ public class MovieDetailsFragment extends Fragment{
             mainProgressBar.setVisibility(View.VISIBLE);
             linearLayout.setVisibility(View.INVISIBLE);
         } else {
-
             // 각 영화에서의 좋아요 싫어요 누른 기록
             prefer = getContext().getSharedPreferences(movieInfo.title, Activity.MODE_PRIVATE);
             editor = prefer.edit();
@@ -186,6 +189,27 @@ public class MovieDetailsFragment extends Fragment{
 
             actor = (TextView)rootView.findViewById(R.id.actor);
             actor.setText(movieInfo.actor);
+
+            // 갤러리 리싸이클러뷰 정의 및 어뎁터 생성
+            recyclerView = (RecyclerView)rootView.findViewById(R.id.recyclerView);
+            LinearLayoutManager manager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+            recyclerView.setLayoutManager(manager);
+            recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
+                @Override
+                public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                    super.getItemOffsets(outRect, view, parent, state);
+                    outRect.set(0,0,20,0);
+                }
+            });
+            galleryAdapter = new GalleryAdapter(getContext());
+            setGalleryAdapter(movieInfo);
+            galleryAdapter.setOnItemClickListener(new GalleryAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(GalleryAdapter.ViewHolder holder, View view, int position) {
+                    recyclerViewItemClick(position);
+                    Toast.makeText(getContext(), "아이템 " + position, Toast.LENGTH_SHORT).show();
+                }
+            });
 
             // 한줄평 리스트뷰 정의 및 어뎁터 생성
             ListView listView = (ListView)rootView.findViewById(R.id.listView);
@@ -293,8 +317,53 @@ public class MovieDetailsFragment extends Fragment{
             });
         }
 
-
         return rootView;
+    }
+
+    public void recyclerViewItemClick(int position) {
+        ArrayList<GalleryInfo> items = galleryAdapter.getItems();
+        GalleryInfo item = items.get(position);
+
+        if(item.isYoutube()) {      // 영상 클릭시
+            String urlStr = item.getUrl();
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlStr));
+
+            startActivity(intent);
+        } else {        // 사진 클릭시
+            Intent intent = new Intent(getContext(), PhotoActivity.class);
+            intent.putExtra("url", item.getUrl());
+            intent.putExtra("id", item.getId());
+
+            startActivity(intent);
+        }
+    }
+
+    public void setGalleryAdapter(MovieInfo movieInfo) {
+        int id = movieInfo.id;
+        String photosUrl = movieInfo.photos;        // 여러 사진 url (콤마로 구분)   ex) ~~.com,~~.com
+        String videosUrl = movieInfo.videos;        // 여러 영상 url (콤마로 구분)
+
+        if(photosUrl != null) {
+            String[] photoUrls = photosUrl.split(",");
+
+            for(String url : photoUrls) {
+                GalleryInfo item = new GalleryInfo(id, url, url,false);
+                galleryAdapter.addItem(item);
+            }
+        }
+
+        if(videosUrl != null) {
+            String[] videoUrls = videosUrl.split(",");
+
+            for(String url : videoUrls) {
+                String newUrl = "https://img.youtube.com/vi/" + url.replace("https://youtu.be/", "") + "/0.jpg";        // 썸네일 url
+                Log.d(LOG, newUrl);
+                GalleryInfo item = new GalleryInfo(id, url, newUrl, true);
+                galleryAdapter.addItem(item);
+            }
+        }
+
+        recyclerView.setAdapter(galleryAdapter);
     }
 
     // 프래그먼트 변경사항을 업데이트 (액티비티로부터 호출)
@@ -302,8 +371,10 @@ public class MovieDetailsFragment extends Fragment{
         this.commentList = commentList;
         this.totalCount = totalCount;
 
-        commentAdapter.setItems(commentList.result);
-        commentAdapter.notifyDataSetChanged();
+        if(commentList != null) {
+            commentAdapter.setItems(commentList.result);
+            commentAdapter.notifyDataSetChanged();
+        }
     }
 
     private void incrLikeCount() {

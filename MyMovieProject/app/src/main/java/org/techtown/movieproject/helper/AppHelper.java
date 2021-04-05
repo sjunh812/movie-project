@@ -1,4 +1,4 @@
-package org.techtown.movieproject;
+package org.techtown.movieproject.helper;
 
 import android.content.Context;
 import android.database.Cursor;
