@@ -1,6 +1,5 @@
 package org.techtown.movieproject;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,6 +7,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.ListView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -20,11 +25,9 @@ import com.google.gson.Gson;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,7 +44,9 @@ import org.techtown.movieproject.callback.FragmentCallback;
 import org.techtown.movieproject.fragment.MovieDetailsFragment;
 import org.techtown.movieproject.fragment.MovieListFragment;
 import org.techtown.movieproject.helper.AppHelper;
+import org.techtown.movieproject.helper.MenuAdapter;
 import org.techtown.movieproject.helper.NetworkStatus;
+import org.techtown.movieproject.helper.PagerAdapter;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -53,14 +58,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final String TAG = "MainActivity";
 
     // UI
-    private AlertDialog networkDialog;
     private Toolbar toolbar;
-    private DrawerLayout drawer;
-    private ViewPager pager;
+    private DrawerLayout drawer;        // 네비게이션 바 내 레이아웃 중 최상단 레이아웃
+    private ViewPager pager;            // 영화 목록을 보여주기위한 뷰페이저(프레그먼트로 구성)
+    private ListView menuListView;      // 옵션메뉴 선택시 나타타는 뷰
+    private View menuView;              // 옵션메뉴를 구성하는 뷰
 
+    // Helper
     private AppHelper helper;
     private FragmentManager manager;
     private PagerAdapter pagerAdapter;
+    private MenuAdapter menuAdapter;
+
+    // 애니메이션
+    private Animation translateUp;
+    private Animation translateDown;
 
     // 프래그먼트
     MovieListFragment listFragment;
@@ -70,37 +82,68 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int currMovieId = -1;       // -1이 아니면 onResume() 에서 동기화
     private Bundle bundle;              // setArgument()를 호출하여 프래그먼트로 전달할 Bundle 객체
     boolean isDetail = false;           // 화면에 띄워진 프래그먼트가 상세보기 프래그먼트인지 여부
+    private int type = 1;               // 1:예매율순, 2:큐레이션, 3:개봉일
+    private boolean isMenuOpen = false; // 옵션메뉴가 열렸는지 여부
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_list);
 
-        // 네트워크 연결상태 점검
-        int networkStatus = NetworkStatus.getConnectivity(getApplicationContext());
+        // 애니메이션 초기화
+        MenuAnimationListener listener = new MenuAnimationListener();
+        translateUp = AnimationUtils.loadAnimation(this, R.anim.translate_up);
+        translateUp.setAnimationListener(listener);
+        translateDown = AnimationUtils.loadAnimation(this, R.anim.translate_down);
+        translateDown.setAnimationListener(listener);
 
-        if(networkStatus == NetworkStatus.TYPE_NOT_CONNECTED) {     // 인터넷 연결안됨
-            AlertDialog.Builder builder = new AlertDialog.Builder(this); //android.R.style.Theme_DeviceDefault_Light_Dialog
-            builder.setMessage("네트워크가 연결되지 않았습니다.\nWI-FI 또는 데이터를 활성화 해주세요.")
-                    .setNegativeButton("다시 시도", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            int networkStatus = NetworkStatus.getConnectivity(getApplicationContext());
-                            if(networkStatus == NetworkStatus.TYPE_NOT_CONNECTED) {     // 인터넷 연결안됨
-                                builder.show();
-                            }
-                        }
-                    })
-                    .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                        
-                        @Override
-                        public void onCancel(DialogInterface dialog) {
-                            finish();
-                        }
-                    });
-            networkDialog = builder.create();
-            networkDialog.show();
-        }
+        // Menu 초기화
+        menuListView = (ListView)findViewById(R.id.menu_listView);
+        menuAdapter = new MenuAdapter(this);
+        menuAdapter.addItem(R.drawable.order11);
+        menuAdapter.addItem(R.drawable.order22);
+        menuAdapter.addItem(R.drawable.order33);
+        menuListView.setAdapter(menuAdapter);
+        menuListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int networkStatus = NetworkStatus.getConnectivity(getApplicationContext());     // 네트워크 상태
+                int curType = type;
+                ImageView imageView = (ImageView)menuView.findViewById(R.id.imageView);
+
+                switch(position) {
+                    case 0:
+                        type = 1;       // 예매율순
+                        imageView.setImageResource(R.drawable.order11);
+                        break;
+                    case 1:
+                        type = 2;       // 큐레이션
+                        imageView.setImageResource(R.drawable.order22);
+                        break;
+                    case 2:
+                        type = 3;       // 상영예정
+                        imageView.setImageResource(R.drawable.order33);
+                        break;
+                }
+
+                if(curType != type) {
+                    pagerAdapter.clearItems();      //  현재 띄워진 뷰페이저 어뎁터 아이템들을 모두 지움
+                    pagerAdapter.notifyDataSetChanged();    // 동기화
+                }
+
+                menuListView.startAnimation(translateUp);
+
+                if(networkStatus == NetworkStatus.TYPE_NOT_CONNECTED) {                             // 인터넷 연결안됨
+                    MovieList movieList = helper.selectMovieList("movielist", type);      // DB 에서 영화목록 데이터 가져옴
+                    if(movieList != null) {
+                        setViewPagerFragment(movieList);
+                        Snackbar.make(toolbar, "네트워크가 연결되지 않았습니다.\nWI-FI 또는 데이터를 활성화 해주세요.", Snackbar.LENGTH_LONG).show();
+                    }
+                }else {                         // 인터넷 연결됨
+                    readMovieList(type);        // 서버로부터 영화목록 가져오기
+                }
+            }
+        });
 
         // Volley 에서 쓸 RequestQueue 정의 (최초 1회)
         if(AppHelper.requestQueue == null) {
@@ -130,13 +173,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this::onNavigationItemSelected);
 
+        // 네트워크 연결상태 점검
+        int networkStatus = NetworkStatus.getConnectivity(getApplicationContext());
+
         if(networkStatus == NetworkStatus.TYPE_NOT_CONNECTED) {     // 인터넷 연결안됨
-            MovieList movieList = helper.selectMovieList("movielist");      // DB 에서 영화목록 데이터 가져옴
+            MovieList movieList = helper.selectMovieList("movielist", type);      // DB 에서 영화목록 데이터 가져옴
+
             if(movieList != null) {
                 setViewPagerFragment(movieList);
             }
         }else {     // 인터넷 연결됨
-            readMovieList();        // 서버로부터 영화목록 가져오기
+            readMovieList(type);        // 서버로부터 영화목록 가져오기
         }
     }
 
@@ -150,10 +197,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     // 영화목록 가져오기
-    public void readMovieList() {
+    public void readMovieList(int type) {
         // type(1:예매율순, 2:큐레이션, 3:개봉일)
         String url = "http://" + AppHelper.host + ":" + AppHelper.port + "/movie/readMovieList" + "?";
-        url += "type=1";
+        url += "type=" + type;
 
         StringRequest request = new StringRequest(
                 Request.Method.GET,
@@ -184,8 +231,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             MovieList movieList = gson.fromJson(response, MovieList.class);
             setViewPagerFragment(movieList);
 
-            // DB에 영화목록 저장
-            helper.insertMovieList("movielist", movieList);
+            helper.insertMovieList("movielist", movieList);     // DB에 영화목록 저장
         }
     }
     public void setViewPagerFragment(MovieList movieList) {
@@ -197,12 +243,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             passInfoToListFragment(listFragment, movieInfo, i+1);
             pagerAdapter.addItem(listFragment);
         }
+
         pager.setAdapter(pagerAdapter);
     }
     public void passInfoToListFragment(Fragment fragment, MovieInfo movieInfo, int index) {
         bundle = new Bundle();
         bundle.putSerializable("movieInfo", movieInfo);     // 영화목록 데이터
-        bundle.putInt("index", index);      // 순서번호
+        bundle.putInt("index", index);                       // 순서번호
 
         fragment.setArguments(bundle);
     }
@@ -217,10 +264,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if(networkStatus == NetworkStatus.TYPE_NOT_CONNECTED) {     // 인터넷 연결안됨
             Snackbar.make(toolbar, "네트워크가 연결되지 않았습니다.\nWI-FI 또는 데이터를 활성화 해주세요.", Snackbar.LENGTH_LONG).show();
 
-            MovieList movieList = helper.selectMovieList("moviedetails");
+            MovieList movieList = helper.selectMovieList("moviedetails", 4);        // 영화상세 DB (type:4 = default)
             ArrayList<MovieInfo> list = movieList.result;
             MovieInfo info = null;
-            CommentList commentList = helper.selectCommentList("commentlist" + id);
+            CommentList commentList = helper.selectCommentList("commentlist" + id);      // 한줄평목록 DB
 
             // 영화 상세보기 DB 데이터 중 id에 맞는 튜플찾기
             for(int i = 0; i < list.size(); i++) {
@@ -240,8 +287,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             transaction = manager.beginTransaction().replace(R.id.container, detailsFragment);
             transaction.addToBackStack(null);       // 뒤로가기 시, 프래그먼트 종료를 위해 BackStack 사용
             transaction.commit();
-        } else {     // 인터넷 연결됨
-            readMovie(id);      // 서버로부터 영화상세보기 가져오기
+        } else {                                                  // 인터넷 연결됨
+            readMovie(id);                                        // 서버로부터 영화상세보기 가져오기
             helper.createTable("commentlist" + id);     // 영화 id 에 맞는 한줄평 테이블 생성 (ex) 영화 ID가 1일 경우 = commentlist1)
         }
     }
@@ -274,13 +321,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Gson gson = new Gson();
         ResponseInfo info = gson.fromJson(response, ResponseInfo.class);
 
-        if(info.code == 200) {      // 정상 응답
+        if(info.code == 200) {                                                // 정상 응답
             MovieList movieList = gson.fromJson(response, MovieList.class);
             MovieInfo movieInfo = movieList.result.get(0);
             helper.insertMovieList("moviedetails", movieList);      // DB에 영화리스트 저장
 
             passInfoToBundle(movieInfo);
-            synchronization(id, 100);
+            synchronization(id, 100);                                    // 조회할 건수 = 100개
         }
     }
     public void passInfoToBundle(MovieInfo movieInfo) {
@@ -326,17 +373,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             CommentList commentList = gson.fromJson(response, CommentList.class);
 
             helper.updateMovieCommentTotalCount("moviedetails", info.totalCount, currMovieId);      // DB에 한줄평 개수 업데이트 (단, moviedetails 테이블에 갱신)
-            helper.insertCommentList("commentlist" + currMovieId, commentList);     // DB에 한줄평 데이터 저장
+            helper.insertCommentList("commentlist" + currMovieId, commentList);                     // DB에 한줄평 데이터 저장
 
             if(isDetail) {      // 영화상세보기 프래그먼트가 화면상단에 위치
                 detailsFragment.update(commentList, info.totalCount);       // 동기화
             }
             else {      // 영화상세보기 외 프래그먼트가 화면상단에 위치
                 passInfoToDetailsFragment(detailsFragment, commentList, info.totalCount);
+                menuView.setVisibility(View.INVISIBLE);                                                       // 영화 상세 프래그먼트이므로 옵션메뉴창을 닫음
+                if(isMenuOpen) {
+                    menuListView.startAnimation(translateUp);
+                }
 
                 FragmentTransaction transaction;
-                transaction = manager.beginTransaction().replace(R.id.container, detailsFragment);      // 영화상세보기 프래그먼트를 화면상단으로 대체
-                transaction.addToBackStack(null);   // 뒤로가기 시 프래그먼트 종료를 위해 BackStack 사용
+                transaction = manager.beginTransaction().replace(R.id.container, detailsFragment);            // 영화상세보기 프래그먼트를 화면상단으로 대체
+                transaction.addToBackStack(null);                                                             // 뒤로가기 시 프래그먼트 종료를 위해 BackStack 사용
                 transaction.commit();
             }
         }
@@ -349,23 +400,56 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fragment.setArguments(bundle);
     }
 
-    // From 다른 액티비티
+    // 증가한 한줄평 추천 수 서버로 전달
+    @Override
+    public void increaseRecommend(int reviewId, int movieId) {
+        int networkStatus = NetworkStatus.getConnectivity(getApplicationContext());
+
+        if(networkStatus == NetworkStatus.TYPE_NOT_CONNECTED) {
+            Snackbar.make(toolbar, "네트워크가 연결되지 않았습니다.\nWI-FI 또는 데이터를 활성화 해주세요.", Snackbar.LENGTH_LONG).show();
+        } else {
+            // review_id(한줄평 id)
+            String url = "http://" + AppHelper.host + ":" + AppHelper.port + "/movie/increaseRecommend" + "?";
+            url += "review_id=" + reviewId;
+
+            StringRequest request = new StringRequest(
+                    Request.Method.GET,
+                    url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            synchronization(movieId, 100);      // 추천 수 변경으로 인한 한줄평 동기화
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                        }
+                    }
+            );
+
+            request.setShouldCache(false);
+            AppHelper.requestQueue.add(request);
+        }
+    }
+
+    // 다른 액티비티로 부터
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
         int networkStatus = NetworkStatus.getConnectivity(getApplicationContext());     // 네트워크 연결상태 점검
 
-        if(networkStatus == NetworkStatus.TYPE_NOT_CONNECTED) {     // 인터넷 연결안됨
-        }else {     // 인터넷 연결됨
+        if(networkStatus == NetworkStatus.TYPE_NOT_CONNECTED) {             // 인터넷 연결안됨
+        }else {                                                             // 인터넷 연결됨
             if(intent != null) {
-                if(intent.getStringExtra("comments") != null) {     // 한줄평 작성하기 액티비티로부터
+                if(intent.getStringExtra("comments") != null) {       // 한줄평 작성하기 액티비티로부터
                     int movieId = intent.getIntExtra("movieId", -1);
                     String userId = intent.getStringExtra("userId");
                     float rating = intent.getFloatExtra("rating", 0.0f);
                     String comments = intent.getStringExtra("comments");
 
-                    createComment(movieId, userId, rating, comments);   // 새로 쓴 한줄평 데이터를 서버로 전달
+                    createComment(movieId, userId, rating, comments);       // 새로 쓴 한줄평 데이터를 서버로 전달
                 }
             }
         }
@@ -416,44 +500,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         startActivity(intent);
     }
 
-    // 증가한 한줄평 추천 수 서버로 전달
-    @Override
-    public void increaseRecommend(int reviewId, int movieId) {
-        int networkStatus = NetworkStatus.getConnectivity(getApplicationContext());
-
-        if(networkStatus == NetworkStatus.TYPE_NOT_CONNECTED) {
-            Snackbar.make(toolbar, "네트워크가 연결되지 않았습니다.\nWI-FI 또는 데이터를 활성화 해주세요.", Snackbar.LENGTH_LONG).show();
-        } else {
-            // review_id(한줄평 id)
-            String url = "http://" + AppHelper.host + ":" + AppHelper.port + "/movie/increaseRecommend" + "?";
-            url += "review_id=" + reviewId;
-
-            StringRequest request = new StringRequest(
-                    Request.Method.GET,
-                    url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            synchronization(movieId, 100);      // 추천 수 변경으로 인한 한줄평 동기화
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                        }
-                    }
-            );
-
-            request.setShouldCache(false);
-            AppHelper.requestQueue.add(request);
-        }
-    }
-
     // 툴바이름 변경
     @Override
     public void changeToolbarTitle(int code) {
         switch(code){
             case 0:
+                menuView.setVisibility(View.VISIBLE);
                 toolbar.setTitle("영화 목록");
                 break;
             default:
@@ -516,27 +568,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return null;
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        //Toast.makeText(this, "OnResume()-MainActivity", Toast.LENGTH_SHORT).show();
+    public boolean getIsMenuOpen() {
+        return isMenuOpen;
+    }
 
-        int networkStatus = NetworkStatus.getConnectivity(getApplicationContext());     // 네트워크 연결상태 점검
-
-        if(networkStatus == NetworkStatus.TYPE_NOT_CONNECTED) {     // 인터넷 연결안됨
-            Snackbar.make(toolbar, "네트워크가 연결되지 않았습니다.\nWI-FI 또는 데이터를 활성화 해주세요.", Snackbar.LENGTH_LONG).show();
-        }else {     // 인터넷 연결됨
-            if(currMovieId != -1) {     // 앱 처음 실행화면이 아닌 상태
-                synchronization(currMovieId, 100);      // 한줄평 동기화
-            }
-        }
+    public void setIsMenuOpen(boolean isMenuOpen) {
+        this.isMenuOpen = isMenuOpen;
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onResume() {
+        super.onResume();
 
-        //Toast.makeText(this, "OnDestroy()-MainActivity", Toast.LENGTH_SHORT).show();
+        int networkStatus = NetworkStatus.getConnectivity(getApplicationContext());     // 네트워크 연결상태 점검
+
+        if(networkStatus == NetworkStatus.TYPE_NOT_CONNECTED) {                         // 인터넷 연결안됨
+            Snackbar.make(toolbar, "네트워크가 연결되지 않았습니다.\nWI-FI 또는 데이터를 활성화 해주세요.", Snackbar.LENGTH_LONG).show();
+        }else {                                                                         // 인터넷 연결됨
+            if(currMovieId != -1) {                                                     // 앱 처음 실행화면이 아닌 상태
+                synchronization(currMovieId, 100);                                 // 한줄평 동기화
+            }
+        }
     }
 
     // 뒤로가기 버튼클릭 시
@@ -550,10 +602,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    // 메뉴 바
+    // 메뉴 바(옵션메뉴)
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // getMenuInflater().inflate(R.menu.movie_list, menu);
+        getMenuInflater().inflate(R.menu.movie_list, menu);
+
+        MenuItem menuItem = menu.getItem(0);
+        menuView = menuItem.getActionView();
+        menuView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isMenuOpen) {
+                    menuListView.startAnimation(translateUp);
+                } else {
+                    menuListView.setVisibility(View.VISIBLE);
+                    menuListView.startAnimation(translateDown);
+                }
+            }
+        });
+
         return true;
     }
 
@@ -579,27 +646,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return false;
     }
 
-    // 뷰페이저 어뎁터 클래스
-    class PagerAdapter extends FragmentStatePagerAdapter {
-        ArrayList<Fragment> items = new ArrayList<>();
-
-        public PagerAdapter(@NonNull FragmentManager fm) {
-            super(fm);
-        }
-
-        public void addItem(Fragment item) {
-            items.add(item);
-        }
-
-        @NonNull
+    class MenuAnimationListener implements Animation.AnimationListener {
         @Override
-        public Fragment getItem(int position) {
-            return items.get(position);
+        public void onAnimationStart(Animation animation) {
+
         }
 
         @Override
-        public int getCount() {
-            return items.size();
+        public void onAnimationEnd(Animation animation) {
+            if(isMenuOpen) {
+                isMenuOpen = false;
+                menuListView.setVisibility(View.INVISIBLE);
+            } else {
+                isMenuOpen = true;
+            }
+        }
+
+        @Override
+        public void onAnimationRepeat(Animation animation) {
+
         }
     }
 }

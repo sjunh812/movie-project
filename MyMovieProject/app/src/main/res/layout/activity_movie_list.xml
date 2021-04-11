@@ -42,9 +42,16 @@
                 android:layout_height="match_parent"
                 android:background="@drawable/main_background"
                 app:layout_anchor="@+id/container"
-                app:layout_anchorGravity="center">
+                app:layout_anchorGravity="center" />
 
-            </androidx.viewpager.widget.ViewPager>
+            <ListView
+                android:id="@+id/menu_listView"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:background="#233E92"
+                android:visibility="invisible" />
+
         </FrameLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

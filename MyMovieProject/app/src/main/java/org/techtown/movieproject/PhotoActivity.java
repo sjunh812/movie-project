@@ -9,6 +9,8 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Debug;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,23 +26,27 @@ import org.techtown.movieproject.helper.NetworkStatus;
 public class PhotoActivity extends AppCompatActivity implements GalleryCallback {
     // 해당 액티비티에선 핀치줌 구현 (PhotoView 외부 라이브러리로 구현가능)
     private static final String LOG = "PhotoActivity";
-    private static final int NONE = 0;
+    private static final float MAX_SCALE = 2.0f;        // 줌 최대치
+    private static final float MIN_SCALE = 0.5f;        // 줌 최소치
+    private static final int NONE = 0;      // 손가락을 땐 상태
     private static final int SINGLE = 1;    // 한 손가락
     private static final int MULTI = 2;     // 두 손가락
 
     private int mode = NONE;
 
-    private Matrix matrix;
-    private Matrix savedMatrix;
+    private Matrix matrix;          // 이동상태(move) matrix 객체
+    private Matrix savedMatrix;     // 터치상태(down) matrix 객체
 
     private PointF startPoint;      // 한 손가락으로 터치시 좌표
     private PointF midPoint;        // 두 손가락으로 줌인,줌아웃시 중간점 좌표
     private float oldDistance;      // 두 손가락으로 줌인,줌아웃시 처음 터치한 두 손가락 간 거리
+    private float totalScale = 1.0f;        // 총 줌 계산치
+    private float baseScale = 1.0f;         // 기준 줌 수치 = 1.0f
 
     private ImageView imageView;
     private ProgressBar progressBar;
     private String urlStr;      // 사진 url
-    private int id;     // 해당 사진의 영화 id
+    private int id;             // 해당 사진의 영화 id
     private ImageLoadTask task;
 
     @Override
@@ -145,13 +151,43 @@ public class PhotoActivity extends AppCompatActivity implements GalleryCallback 
 
     private void moveMultiEvent(MotionEvent event) {
         float newDistance = getDistance(event);
+        float curScale = 0f;
 
-        if(newDistance > 5f) {
-            matrix.set(savedMatrix);
-            float scale = newDistance / oldDistance;
-            matrix.postScale(scale, scale, midPoint.x, midPoint.y);
-            imageView.setImageMatrix(matrix);
+        if(newDistance > oldDistance) {
+            if((newDistance - oldDistance) < 3f){
+                return;
+            }
+
+            curScale = baseScale + (oldDistance / newDistance * 0.07f);
+        } else if(newDistance < oldDistance) {
+            if((oldDistance - newDistance) < 3f) {
+                return;
+            }
+
+            curScale = baseScale - (newDistance / oldDistance * 0.07f);
         }
+
+        if(totalScale < MIN_SCALE) {
+            if(curScale > 1) {
+                scaleImage(curScale);
+            }
+        } else if(totalScale > MAX_SCALE) {
+            if(curScale < 1) {
+                scaleImage(curScale);
+            }
+        } else {
+            scaleImage(curScale);
+        }
+
+        oldDistance = newDistance;
+    }
+
+    private void scaleImage(float curScale) {
+        matrix.postScale(curScale, curScale, midPoint.x, midPoint.y);
+        imageView.setImageMatrix(matrix);
+        totalScale *= curScale;
+
+        Log.d(LOG, "totalScale : " + totalScale);
     }
 
     private float getDistance(MotionEvent event) {

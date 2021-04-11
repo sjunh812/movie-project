@@ -67,7 +67,7 @@ public class AppHelper {
             + "totalcount integer DEFAULT 0);";
     private static String insertMovieListSQL = "INSERT OR REPLACE INTO movielist " + "values(?,?,?,?,?,?,?,?,?,?,?,?);";
     private static String insertMovieDetailsSQL = "INSERT OR REPLACE INTO moviedetails " + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
-    private static String selectMovielistSQL = "SELECT * FROM movielist;";
+    private static String selectMovielistSQL = "SELECT * FROM movielist";       // ';' 빠져있는 상태
     private static String selectMovieDetailsSQL = "SELECT * FROM moviedetails;";
 
     public void openDB(Context context, String dbName) {
@@ -79,11 +79,9 @@ public class AppHelper {
         if(db != null) {
             if(tableName.equals("movielist")) {
                 db.execSQL(createMovieListSQL);
-
                 Log.d(LOG, "createTable() : 영화목록 테이블 생성됨.");
             } else if(tableName.equals("moviedetails")) {
                 db.execSQL(createMovieDetailsSQL);
-
                 Log.d(LOG, "createTable() : 영화상세보기 테이블 생성됨.");
             } else {        // 테이블 이름 : commentlist + 영화 id (ex) commentlist2)
                 String createCommentListSQL = "CREATE TABLE IF NOT EXISTS " + tableName + "("
@@ -170,11 +168,26 @@ public class AppHelper {
         }
     }
 
-    public MovieList selectMovieList(String tableName) {
+    public MovieList selectMovieList(String tableName, int type) {      // type:4 = default
         if(db != null) {
             if(tableName.equals("movielist")){
-                Cursor cursor = db.rawQuery(selectMovielistSQL, null);
                 ArrayList<MovieInfo> list = new ArrayList<>();
+                Cursor cursor;
+
+                switch(type) {
+                    case 1:     // 예매율순
+                        cursor = db.rawQuery(selectMovielistSQL + " ORDER BY reservation_grade ASC;", null);
+                        break;
+                    case 2:     // 큐레이션
+                        cursor = db.rawQuery(selectMovielistSQL + " ORDER BY audience_rating DESC;", null);
+                        break;
+                    case 3:     // 개봉일
+                        cursor = db.rawQuery(selectMovielistSQL + " ORDER BY date(date_value) DESC;", null);
+                        break;
+                    default:
+                        cursor = db.rawQuery(selectMovielistSQL + " ORDER BY _id ASC;", null);
+                        break;
+                }
 
                 while(cursor.moveToNext()) {
                     MovieInfo info = new MovieInfo(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getFloat(4),
