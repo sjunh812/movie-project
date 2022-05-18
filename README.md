@@ -1,7 +1,6 @@
 # 📽 씨네마천국 - 부스트코스 영화 앱
 <img src="https://user-images.githubusercontent.com/79048895/168417665-d573cb1b-ad91-4f03-9626-d9498e94d723.png" width="100" height="100" />  
-<br>
-<br>
+
 ## 📷 스크린샷
 <img src="https://user-images.githubusercontent.com/79048895/168417860-0aa7b077-3eef-47ba-ac22-601d4670a4f4.jpg" width="180" height="390" /> <img src="https://user-images.githubusercontent.com/79048895/168417837-ba6ef048-0a32-4191-b974-dfae1781438e.jpg" width="180" height="390" /> <img src="https://user-images.githubusercontent.com/79048895/168417883-e7570c8b-e4ed-4c2e-9e29-97ae7f581f80.jpg" width="180" height="390" /> <img src="https://user-images.githubusercontent.com/79048895/168417895-816ae960-82d4-4a1d-b6cb-b1c6f61c863e.jpg" width="180" height="390" /> <img src="https://user-images.githubusercontent.com/79048895/168417910-0a01a56f-c88e-4585-a0f0-8c0ea7c7183e.jpg" width="180" height="390" /> <img src="https://user-images.githubusercontent.com/79048895/168417950-22f6e6c5-9065-4260-98c7-d7bd57d1e70b.jpg" width="180" height="390" />
 <br>
