@@ -1,5 +1,5 @@
 # 📽 씨네마천국 - 부스트코스 영화 앱
-<img src="https://user-images.githubusercontent.com/79048895/168417665-d573cb1b-ad91-4f03-9626-d9498e94d723.png" width="50" height="50" />
+<img src="https://user-images.githubusercontent.com/79048895/168417665-d573cb1b-ad91-4f03-9626-d9498e94d723.png" width="100" height="100" />
 <br>
 <br>
 ## 📷 스크린샷
